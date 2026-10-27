@@ -1,0 +1,138 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ],
+          "sender": ""
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -224,
+        -64
+      ],
+      "id": "9676f6e5-abd3-43c7-b0f8-ff8d2422d2e8",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rIbq9fuXEqzBuBfR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "Gemini 3.1 Flash Lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an email assistant. Choose exactly one label for this email from: AI-Inbox, Work, Personal, Finance, Newsletter, Security, Other.\n\nRules:\n- Use AI-Inbox for job alerts, recruiter emails, and emails about AI, DevOps, cloud, or n8n.\n- Use Other only if nothing else fits.\n\nFrom: {{ $('Gmail Trigger').item.json.From }}\nSubject: {{ $('Gmail Trigger').item.json.Subject }}\nSnippet: {{ $('Gmail Trigger').item.json.snippet }}\n\nReply with only the label name and nothing else."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "176a8da8-5caa-417c-9a55-83bf1b676c36",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "label"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        -64
+      ],
+      "id": "075c0c4e-7ec7-4b3b-95cb-86234be5ecbf",
+      "name": "Get many labels",
+      "webhookId": "67786769-83f0-4962-b0e0-5f6986931848",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rIbq9fuXEqzBuBfR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const labels = $('Get many labels').all().map(i => i.json);\n\nconst out = $('Message a model').first().json;\nconst raw = out.content?.parts?.[0]?.text ?? out.text ?? out.output ?? '';\nconst name = String(raw).trim().replace(/^[\"'\\s]+|[.\"'\\s]+$/g, '');\n\nconst match = labels.find(l => l.name.toLowerCase() === name.toLowerCase());\nconst fallback = labels.find(l => l.name === 'AI-Inbox');\n\nreturn [{\n  json: {\n    geminiSaid: name,\n    matched: !!match,\n    labelId: (match || fallback || {}).id || null,\n    messageId: $('Gmail Trigger').first().json.id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -16
+      ],
+      "id": "f200b9d6-b13e-48eb-9317-40ea7ab38656",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": "={{ $json.labelId }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        736,
+        -16
+      ],
+      "id": "95f64af6-b6f7-4e48-b92d-937aa2765cc3",
+      "name": "Add label to message",
+      "webhookId": "92a9b863-3c76-4ed5-84e2-dd136dffc5e5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rIbq9fuXEqzBuBfR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bf02f3d5-a318-4719-afe6-c5df06f8aea8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4b86072ffb5e37c7a11ba9f769ac4c83bac2471af9074a474c398bd07621536"
+  },
+  "nodeGroups": [],
+  "id": "AE0LzGlFhGsOrSWy",
+  "tags": []
+}

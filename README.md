@@ -4,7 +4,8 @@
 An n8n workflow that reads new emails, uses Google Gemini to choose the best label, and applies it in Gmail automatically.
 
 ## Workflow
-![Workflow canvas](images/workflow-canvas.png)
+![Workflow canvas]
+<img width="1885" height="993" alt="Email messagin model" src="https://github.com/user-attachments/assets/01186d46-08c6-40b6-8927-d67985eeac8e" />
 
 ```
 Gmail Trigger → Gemini (Message a model) → Get many labels → Code (label lookup) → Add label to message

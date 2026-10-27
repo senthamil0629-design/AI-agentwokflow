@@ -12,7 +12,8 @@ Gmail Trigger → Gemini (Message a model) → Get many labels → Code (label l
 ```
 
 ## Result
-![Labeled email in Gmail](images/gmail-result.png)
+<img width="1903" height="782" alt="Aiagent Output" src="https://github.com/user-attachments/assets/8f9c217d-59d6-4b32-9abd-2f9208470d2d" />
+
 
 ## How it works
 1. **Gmail Trigger** polls the inbox for new messages.
